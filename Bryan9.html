@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DragonBallZ</title>
+    <style>
+     :root{
+        --color-primario: #0cb9d8;
+        --color-secundario:#033544;
+        --color-terceario:#f5f6f8;
+        --color-cuarto:#669BBC;
+        --color-quinto:#7B9E87;
+     }
+     * {
+        box-sizing: border-box;
+     }
+     body{
+        background-color: var(--color-primario);
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        margin: 0;
+     }
+     header{
+        padding: 15px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--color-secundario);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+     }
+     #formRM, #formHP {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+     }
+     .search{
+        background-color: var(--color-primario);
+        border: 2px solid var(--color-terceario);
+        border-radius: 50px;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-size: 15px;
+        padding: 8px 15px;
+        color: var(--color-terceario);
+     }
+     .search::placeholder{
+        color: var(--color-terceario);  
+     }
+     .search:focus{
+        outline: none;
+        background-color: var(--color-quinto);
+     }
+     main{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+     }
+     .personaje{
+        width: 400px;
+        margin: 15px;
+        background: var(--color-secundario);
+        box-shadow: 10px 15px 1px var(--color-cuarto);
+        position: relative;
+        overflow: hidden;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+     }
+     .personaje img {
+        width: 80%;
+        height: 400px;
+        object-fit: contain;
+     }
+     .personaje-info{
+        color: var(--color-terceario);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 15px 15px 15px;
+        letter-spacing: 5px;
+     }
+     .personaje-info h3{
+        color: var(--color-terceario);
+        margin: 0;
+     }
+    .personaje-info h1{
+        color: var(--color-primario);
+        margin-top: 0;
+    }
+    .description {
+        background-color: var(--color-quinto);
+        padding: 15px;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        max-height: 100%;
+        transform: translateY(101%);
+        overflow-y:  auto;
+        transition: transform 0.3s ease-in;
+    }
+    .personaje:hover .description {
+        transform: translateY(0);
+    }
+    </style>
+</head>
+<body>
+
+<header>
+    <form id="formRM" autocomplete="off">
+        <img src="ricky.jpeg" alt="logo RM" style="width: 80px;">
+        <input type="text" id="searchRM" class="search" placeholder="Buscar Personaje RM" />
+    </form>
+</header>
+<main id="mainRM"></main>
+
+<header>
+    <form id="formHP" autocomplete="off">
+        <img src="harry1.jpg" alt="logo HP" style="width: 80px;">
+        <input type="text" id="searchHP" class="search" placeholder="Buscar Personaje HP" />
+    </form>
+</header>
+<main id="mainHP"></main>
+
+<script>
+const URL_RM = 'https://rickandmortyapi.com/api/character';
+const contenedorRM = document.getElementById('mainRM');
+const formularioRM = document.getElementById('formRM');
+const inputRM = document.getElementById('searchRM');
+
+getCharsRM(URL_RM);
+
+async function getCharsRM(url) {
+    try {
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error('Error en la API Rick and Morty');
+        const datos = await respuesta.json();
+        mostrarCharsRM(datos.results || []);
+    } catch (error) {
+        contenedorRM.innerHTML = '<p style="color:red;">No se pudieron cargar los personajes de Rick and Morty.</p>';
+    }
+}
+
+function mostrarCharsRM(personajes) {
+    contenedorRM.innerHTML = '';
+    personajes.forEach((char) => {
+        const { name, image, species, status, gender } = char;
+        const divChar = document.createElement('div');
+        divChar.classList.add('personaje');
+        divChar.innerHTML = `
+            <img src="${image}" alt="${name}">
+            <div class="personaje-info">
+                <h3>${name}</h3>
+                <span>${species || ''}</span>
+            </div>
+            <div class="description">
+                <h3>Detalles</h3>
+                <p><strong>Estado:</strong> ${status || '-'}</p>
+                <p><strong>Género:</strong> ${gender || '-'}</p>
+            </div>`;
+        contenedorRM.appendChild(divChar);
+    });
+}
+
+formularioRM.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const termino = inputRM.value.trim().toLowerCase();
+    if (termino && termino !== '') {
+        getCharsRM(URL_RM + `/?name=${termino}`);
+    } else {
+        getCharsRM(URL_RM);
+    }
+});
+</script>
+
+<script>
+const URL_HP = 'https://hp-api.onrender.com/api/characters';
+const contenedorHP = document.getElementById('mainHP');
+const formularioHP = document.getElementById('formHP');
+const inputHP = document.getElementById('searchHP');
+
+getCharsHP(URL_HP);
+
+async function getCharsHP(url) {
+    try {
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error('Error en la API Harry Potter');
+        const datos = await respuesta.json();
+        mostrarCharsHP(datos);
+    } catch (error) {
+        contenedorHP.innerHTML = '<p style="color:red;">No se pudieron cargar los personajes de Harry Potter.</p>';
+    }
+}
+
+function mostrarCharsHP(personajes) {
+    contenedorHP.innerHTML = '';
+    personajes.forEach((char) => {
+        const { name, image, house, ancestry, patronus } = char;
+        const divChar = document.createElement('div');
+        divChar.classList.add('personaje');
+        divChar.innerHTML = `
+            <img src="${image}" alt="${name}">
+            <div class="personaje-info">
+                <h3>${name}</h3>
+                <span>${house || ''}</span>
+            </div>
+            <div class="description">
+                <h3>Detalles</h3>
+                <p><strong>Linaje:</strong> ${ancestry || '-'}</p>
+                <p><strong>Patronus:</strong> ${patronus || '-'}</p>
+            </div>`;
+        contenedorHP.appendChild(divChar);
+    });
+}
+
+formularioHP.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const termino = inputHP.value.trim().toLowerCase();
+    try {
+        const respuesta = await fetch(URL_HP);
+        if (!respuesta.ok) throw new Error('Error en la API Harry Potter');
+        const datos = await respuesta.json();
+        // Filtra por nombre
+        const filtrados = datos.filter(char => char.name.toLowerCase().includes(termino));
+        mostrarCharsHP(termino ? filtrados : datos);
+    } catch (error) {
+        contenedorHP.innerHTML = '<p style="color:red;">No se pudieron cargar los personajes de Harry Potter.</p>';
+    }
+});
+</script>
+
+</body>
+</html>
